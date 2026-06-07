@@ -8,6 +8,7 @@ import 'cart_screen.dart';
 import 'legal_screen.dart';
 import 'order_history_screen.dart';
 import 'login_screen.dart';
+import 'admin_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -132,6 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 title: const Text('Admin Panel'),
                 onTap: () {
                   Navigator.pop(context);
+                  Navigator.push(context, MaterialPageRoute(builder: (_) => const AdminScreen()));
                 },
               ),
             ListTile(
