@@ -36,7 +36,14 @@ class _ProductDetailScreenState extends State<ProductDetailScreen> {
               width: double.infinity,
               height: 250,
               color: Colors.grey[100],
-              child: Icon(_getIconForProduct(widget.product.id), size: 100, color: Colors.indigo),
+              child: widget.product.image != null
+                  ? Image.asset(
+                      'assets/${widget.product.image}',
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) =>
+                          Icon(_getIconForProduct(widget.product.id), size: 100, color: Colors.indigo),
+                    )
+                  : Icon(_getIconForProduct(widget.product.id), size: 100, color: Colors.indigo),
             ),
             const SizedBox(height: 20),
             Text(

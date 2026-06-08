@@ -184,7 +184,14 @@ class _HomeScreenState extends State<HomeScreen> {
                             width: 60,
                             height: 60,
                             color: Colors.grey[200],
-                            child: Icon(_getIconForProduct(p.id), size: 30, color: Colors.indigo),
+                            child: p.image != null
+                                ? Image.asset(
+                                    'assets/${p.image}',
+                                    fit: BoxFit.cover,
+                                    errorBuilder: (context, error, stackTrace) =>
+                                        Icon(_getIconForProduct(p.id), size: 30, color: Colors.indigo),
+                                  )
+                                : Icon(_getIconForProduct(p.id), size: 30, color: Colors.indigo),
                           ),
                           title: Text(p.name, style: const TextStyle(fontWeight: FontWeight.bold)),
                           subtitle: Text('${p.type} • Stock: ${p.stock}'),

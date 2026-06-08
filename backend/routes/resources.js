@@ -21,7 +21,7 @@ router.get('/:id', verifyToken, (req, res) => {
 router.post('/', verifyAdmin, (req, res) => {
   const { id, name, type, description, stock, image, price } = req.body;
 
-  if (!id || !name || !type || !description || stock === undefined || !price) {
+  if (!id || !name || !type || !description || stock === undefined || !image || !price) {
     return res.status(400).json({ message: 'All fields (id, name, type, description, stock, price) are required.' });
   }
   if (isNaN(stock) || stock < 0) {
@@ -44,7 +44,7 @@ router.post('/', verifyAdmin, (req, res) => {
 router.put('/:id', verifyAdmin, (req, res) => {
   const { name, type, description, stock, image, price } = req.body;
 
-  if (!name || !type || !description || stock === undefined || !price) {
+  if (!id || !name || !type || !description || stock === undefined || !image || !price) {
     return res.status(400).json({ message: 'All fields (name, type, description, stock, price) are required.' });
   }
   if (isNaN(stock) || stock < 0) {

@@ -49,13 +49,15 @@ cd frontend/flutter_app
 
 # Install dependencies
 flutter pub get
+--------------------
 
+terus pilih salah satu dari ini tergantung mau run dimana
 # Run on web (Chrome)
 flutter run -d chrome --web-port=5000
 
 # Run on Android emulator
 flutter run
----------------------
+
 Frontend will run on: http://localhost:5000
 
 4. Default Credentials

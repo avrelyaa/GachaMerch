@@ -209,7 +209,7 @@ class _AdminFormScreenState extends State<AdminFormScreen> {
       'type': _typeController.text.trim(),
       'description': _descController.text.trim(),
       'stock': int.parse(_stockController.text.trim()),
-      'image': _imageController.text.trim().isEmpty ? null : _imageController.text.trim(),
+      'image': _imageController.text.trim(),
       'price': double.parse(_priceController.text.trim()),
     };
 
@@ -335,9 +335,13 @@ class _AdminFormScreenState extends State<AdminFormScreen> {
               TextFormField(
                 controller: _imageController,
                 decoration: const InputDecoration(
-                  labelText: 'Image filename (optional)',
+                  labelText: 'Image filename',
                   border: OutlineInputBorder(),
                 ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) return 'Image filename is required.';
+                  return null;
+                },
               ),
               const SizedBox(height: 16),
 
@@ -358,6 +362,7 @@ class _AdminFormScreenState extends State<AdminFormScreen> {
               ),
               const SizedBox(height: 32),
 
+              // Submit
               SizedBox(
                 width: double.infinity,
                 height: 50,
