@@ -1,32 +1,55 @@
-Setup & Installation
+# GachaMerch
 
-Prerequisites
-- Flutter SDK
-- Node.js
-- XAMPP (MySQL)
+## Features
+- JWT Authentication
+- Google OAuth Login
+- Admin Resource Management
+- Flutter Frontend
+- MySQL Database
 
-1. Database Setup
-  1. Start XAMPP and enable MySQL
-  2. Open phpMyAdmin (http://localhost/phpmyadmin)
-  3. Import the schema file:
-     - Go to Import tab
-     - Choose file: schema.sql
-     - Click Go
+## Setup & Installation
 
+### Prerequisites
 
-2. Backend Setup
+Before running the project, make sure the following software is installed:
 
-copy code ini dan paste di terminal
---------------------
+* Flutter SDK
+* Node.js
+* XAMPP (MySQL)
+
+### Database Setup
+
+1. Start **XAMPP** and enable **MySQL**.
+
+2. Open **phpMyAdmin**:
+
+   ```
+   http://localhost/phpmyadmin
+   ```
+
+3. Import the database schema:
+
+   * Go to the **Import** tab.
+   * Select the `schema.sql` file.
+   * Click **Go**.
+
+### Backend Setup
+
+Open a terminal and run:
+
+```bash
 # Navigate to backend folder
 cd backend
 
 # Install dependencies
 npm install
+```
 
-# Configure environment variables
-Edit .env file:
-```bash
+#### Configure Environment Variables
+
+Edit the `.env` file:
+
+```env
 DB_HOST=localhost
 DB_USER=root
 DB_PASSWORD=
@@ -35,90 +58,112 @@ JWT_SECRET=gachamerch_secret_key_2026
 PORT=3000
 ```
 
-# Start the backend server
+#### Start the Backend Server
+
+```bash
 node server.js
----------------------
+```
 
-Backend will run on: http://localhost:3000
+Backend will run on:
 
-3. Frontend Setup
+```text
+http://localhost:3000
+```
 
-open new terminal dan paste ini
---------------------
+### Frontend Setup
+
+Open a new terminal and run:
+
+```bash
 # Navigate to Flutter app folder
 cd frontend/flutter_app
 
 # Install dependencies
 flutter pub get
---------------------
+```
 
-terus pilih salah satu dari ini tergantung mau run dimana
-# Run on web (Chrome)
+#### Run the Application
+
+Choose one of the following options depending on your target platform.
+
+##### Run on Web (Chrome)
+
+```bash
 flutter run -d chrome --web-port=5000
+```
 
-# Run on Android emulator
+##### Run on Android Emulator
+
+```bash
 flutter run
+```
 
-Frontend will run on: http://localhost:5000
+Frontend will run on:
 
-4. Default Credentials
-Admin    admin@gachamerch.com     password123
-User     john@example.com         password123
+```text
+http://localhost:5000
+```
 
-API Endpoints
-Auth
-Method   Endpoint        Access   Description
-POST     /auth/register  Public   Register new user
-POST     /auth/login     Public   Login, returns JWT token
-POST     /auth/google    Public   Google OAuth login
+### Default Credentials
 
-Resources
-Method   Endpoint         Access        Description
-GET      /resources       Public        Get all resources
-GET      /resources/:id   Bearer Token  Get single resource
-POST     /resources       Admin only    Create new resource
-PUT      /resources/:id   Admin only    Update resource
-DELETE   /resources/:id   Admin only    Delete resource
+| Role  | Email                                               | Password    |
+| ----- | --------------------------------------------------- | ----------- |
+| Admin | [admin@gachamerch.com](mailto:admin@gachamerch.com) | password123 |
+| User  | [john@example.com](mailto:john@example.com)         | password123 |
 
-Bearer Token Usage
-After login, include the token in request headers:
+## API Documentation
 
+### Authentication Endpoints
+
+| Method | Endpoint         | Access | Description                 |
+| ------ | ---------------- | ------ | --------------------------- |
+| POST   | `/auth/register` | Public | Register a new user         |
+| POST   | `/auth/login`    | Public | Login and receive JWT token |
+| POST   | `/auth/google`   | Public | Google OAuth login          |
+
+### Resource Endpoints
+
+| Method | Endpoint         | Access       | Description                  |
+| ------ | ---------------- | ------------ | ---------------------------- |
+| GET    | `/resources`     | Public       | Retrieve all resources       |
+| GET    | `/resources/:id` | Bearer Token | Retrieve a specific resource |
+| POST   | `/resources`     | Admin Only   | Create a new resource        |
+| PUT    | `/resources/:id` | Admin Only   | Update an existing resource  |
+| DELETE | `/resources/:id` | Admin Only   | Delete a resource            |
+
+### Bearer Token Usage
+
+After logging in, include the JWT token in the request header:
+
+```http
 Authorization: Bearer <token>
+```
 
-The token is a JWT with a 32-character alphanumeric jti (JWT ID), satisfying the ≥20 character alphanumeric requirement.
+The JWT contains a 32-character alphanumeric `jti` (JWT ID), satisfying the requirement of a minimum 20-character alphanumeric identifier.
 
-🗄️ Database Schema
-users table
-Column           Type                Description
-id               INT (PK)            Auto increment
-username         VARCHAR(50)         Unique username
-email            VARCHAR(100)        Unique email
-password         VARCHAR(255)        bcrypt hash
-role             ENUM                'admin' or 'user'
-created_at       TIMESTAMP           Creation time
+## Database Schema
 
-resources table
-Column           Type                   Description
-id               VARCHAR(20) (PK)       e.g. TSR-001
-name             VARCHAR(100)           Product 
-nametype         VARCHAR(50)            e.g. Apparel, Pin
-description      TEXT                   Product description
-stock            INT                    Available stock
-image            VARCHAR(255)           Image filename
-price            DECIMAL(10,2)          Product price
-created_at       TIMESTAMP              Creation time
-updated_at       TIMESTAMP              Last update time
+### users Table
 
+| Column     | Type         | Description                |
+| ---------- | ------------ | -------------------------- |
+| id         | INT (PK)     | Auto-increment user ID     |
+| username   | VARCHAR(50)  | Unique username            |
+| email      | VARCHAR(100) | Unique email address       |
+| password   | VARCHAR(255) | bcrypt password hash       |
+| role       | ENUM         | `admin` or `user`          |
+| created_at | TIMESTAMP    | Account creation timestamp |
 
+### resources Table
 
-
-
-
-
-
-
-
-
-
-
-
+| Column      | Type             | Description                           |
+| ----------- | ---------------- | ------------------------------------- |
+| id          | VARCHAR(20) (PK) | Resource ID (e.g., TSR-001)           |
+| name        | VARCHAR(100)     | Product name                          |
+| nametype    | VARCHAR(50)      | Product category (e.g., Apparel, Pin) |
+| description | TEXT             | Product description                   |
+| stock       | INT              | Available stock                       |
+| image       | VARCHAR(255)     | Product image filename                |
+| price       | DECIMAL(10,2)    | Product price                         |
+| created_at  | TIMESTAMP        | Creation timestamp                    |
+| updated_at  | TIMESTAMP        | Last update timestamp                 |
