@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import '../services/api_service.dart';
 import 'home_screen.dart';
 
@@ -14,6 +15,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _isGoogleLoading = false;
   bool _obscurePassword = true;
 
   @override
@@ -25,25 +27,20 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Future<void> _login() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
-
     try {
       final result = await ApiService.login(
         _emailController.text.trim(),
         _passwordController.text,
       );
-
       if (!mounted) return;
-
       if (result['status'] == 200) {
         Navigator.pushReplacement(
           context,
           MaterialPageRoute(builder: (_) => const HomeScreen()),
         );
       } else {
-        final message = result['data']['message'] ?? 'Login failed.';
-        _showError(message);
+        _showError(result['data']['message'] ?? 'Login failed.');
       }
     } catch (e) {
       _showError('Cannot connect to server. Make sure the backend is running.');
@@ -52,12 +49,47 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
+  Future<void> _googleLogin() async {
+    setState(() => _isGoogleLoading = true);
+    try {
+      final googleSignIn = GoogleSignIn(
+        clientId:
+            '10240196102-vgpfgkna7qbqgo7iu9jjfbn6bc34arj9.apps.googleusercontent.com',
+        scopes: ['email', 'profile'],
+      );
+      final googleUser = await googleSignIn.signIn();
+      if (googleUser == null) {
+        setState(() => _isGoogleLoading = false);
+        return;
+      }
+
+      final result = await ApiService.googleLogin(
+        email: googleUser.email,
+        username: googleUser.displayName ?? googleUser.email.split('@')[0],
+        googleId: googleUser.id,
+      );
+
+      if (!mounted) return;
+
+      if (result['status'] == 200 || result['status'] == 201) {
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(builder: (_) => const HomeScreen()),
+        );
+      } else {
+        _showError(result['data']['message'] ?? 'Google login failed.');
+      }
+    } catch (e) {
+      print('Google error: $e');
+      _showError('Google Sign-In failed. Please try again.');
+    } finally {
+      if (mounted) setState(() => _isGoogleLoading = false);
+    }
+  }
+
   void _showError(String message) {
     ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text(message),
-        backgroundColor: Colors.red,
-      ),
+      SnackBar(content: Text(message), backgroundColor: Colors.red),
     );
   }
 
@@ -77,22 +109,17 @@ class _LoginScreenState extends State<LoginScreen> {
                 const Text(
                   'GachaMerch',
                   style: TextStyle(
-                    fontSize: 32,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.indigo,
-                  ),
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.indigo),
                 ),
-                const Text(
-                  'Honkai Star Retail',
-                  style: TextStyle(fontSize: 16, color: Colors.grey),
-                ),
+                const Text('Honkai Star Retail',
+                    style: TextStyle(fontSize: 16, color: Colors.grey)),
                 const SizedBox(height: 40),
-
                 Card(
                   elevation: 4,
                   shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(16),
-                  ),
+                      borderRadius: BorderRadius.circular(16)),
                   child: Padding(
                     padding: const EdgeInsets.all(24.0),
                     child: Form(
@@ -100,13 +127,9 @@ class _LoginScreenState extends State<LoginScreen> {
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
-                          const Text(
-                            'Sign In',
-                            style: TextStyle(
-                              fontSize: 22,
-                              fontWeight: FontWeight.bold,
-                            ),
-                          ),
+                          const Text('Sign In',
+                              style: TextStyle(
+                                  fontSize: 22, fontWeight: FontWeight.bold)),
                           const SizedBox(height: 24),
 
                           TextFormField(
@@ -118,12 +141,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               border: OutlineInputBorder(),
                             ),
                             validator: (value) {
-                              if (value == null || value.isEmpty) {
+                              if (value == null || value.isEmpty)
                                 return 'Email is required.';
-                              }
-                              if (!value.contains('@') || !value.contains('.')) {
+                              if (!value.contains('@') || !value.contains('.'))
                                 return 'Enter a valid email address.';
-                              }
                               return null;
                             },
                           ),
@@ -145,12 +166,10 @@ class _LoginScreenState extends State<LoginScreen> {
                               ),
                             ),
                             validator: (value) {
-                              if (value == null || value.isEmpty) {
+                              if (value == null || value.isEmpty)
                                 return 'Password is required.';
-                              }
-                              if (value.length < 6) {
+                              if (value.length < 6)
                                 return 'Password must be at least 6 characters.';
-                              }
                               return null;
                             },
                           ),
@@ -169,6 +188,42 @@ class _LoginScreenState extends State<LoginScreen> {
                           ),
                           const SizedBox(height: 16),
 
+                          const Row(
+                            children: [
+                              Expanded(child: Divider()),
+                              Padding(
+                                padding: EdgeInsets.symmetric(horizontal: 8),
+                                child: Text('OR',
+                                    style: TextStyle(color: Colors.grey)),
+                              ),
+                              Expanded(child: Divider()),
+                            ],
+                          ),
+                          const SizedBox(height: 16),
+
+                          SizedBox(
+                            height: 50,
+                            child: OutlinedButton.icon(
+                              onPressed: _isGoogleLoading ? null : _googleLogin,
+                              icon: _isGoogleLoading
+                                  ? const SizedBox(
+                                      width: 20,
+                                      height: 20,
+                                      child: CircularProgressIndicator(
+                                          strokeWidth: 2),
+                                    )
+                                  : const Icon(Icons.g_mobiledata,
+                                      size: 28, color: Colors.red),
+                              label: const Text('Sign in with Google',
+                                  style: TextStyle(
+                                      fontSize: 16, color: Colors.black87)),
+                              style: OutlinedButton.styleFrom(
+                                side: const BorderSide(color: Colors.grey),
+                              ),
+                            ),
+                          ),
+                          const SizedBox(height: 16),
+
                           Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
@@ -182,9 +237,8 @@ class _LoginScreenState extends State<LoginScreen> {
                                 child: const Text(
                                   'Register',
                                   style: TextStyle(
-                                    color: Colors.indigo,
-                                    fontWeight: FontWeight.bold,
-                                  ),
+                                      color: Colors.indigo,
+                                      fontWeight: FontWeight.bold),
                                 ),
                               ),
                             ],
@@ -230,18 +284,14 @@ class _RegisterScreenState extends State<RegisterScreen> {
 
   Future<void> _register() async {
     if (!_formKey.currentState!.validate()) return;
-
     setState(() => _isLoading = true);
-
     try {
       final result = await ApiService.register(
         _usernameController.text.trim(),
         _emailController.text.trim(),
         _passwordController.text,
       );
-
       if (!mounted) return;
-
       if (result['status'] == 201) {
         ScaffoldMessenger.of(context).showSnackBar(
           const SnackBar(
@@ -251,17 +301,18 @@ class _RegisterScreenState extends State<RegisterScreen> {
         );
         Navigator.pop(context);
       } else {
-        final message = result['data']['message'] ?? 'Registration failed.';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(message), backgroundColor: Colors.red),
+          SnackBar(
+            content: Text(result['data']['message'] ?? 'Registration failed.'),
+            backgroundColor: Colors.red,
+          ),
         );
       }
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
-          content: Text('Cannot connect to server.'),
-          backgroundColor: Colors.red,
-        ),
+            content: Text('Cannot connect to server.'),
+            backgroundColor: Colors.red),
       );
     } finally {
       if (mounted) setState(() => _isLoading = false);
@@ -293,6 +344,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                               fontSize: 22, fontWeight: FontWeight.bold)),
                       const SizedBox(height: 24),
 
+                      // Username
                       TextFormField(
                         controller: _usernameController,
                         decoration: const InputDecoration(
@@ -301,17 +353,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           border: OutlineInputBorder(),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
+                          if (value == null || value.isEmpty)
                             return 'Username is required.';
-                          }
-                          if (value.length < 3) {
+                          if (value.length < 3)
                             return 'Username must be at least 3 characters.';
-                          }
                           return null;
                         },
                       ),
                       const SizedBox(height: 16),
 
+                      // Email
                       TextFormField(
                         controller: _emailController,
                         keyboardType: TextInputType.emailAddress,
@@ -321,17 +372,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           border: OutlineInputBorder(),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
+                          if (value == null || value.isEmpty)
                             return 'Email is required.';
-                          }
-                          if (!value.contains('@') || !value.contains('.')) {
+                          if (!value.contains('@') || !value.contains('.'))
                             return 'Enter a valid email address.';
-                          }
                           return null;
                         },
                       ),
                       const SizedBox(height: 16),
 
+                      // Password
                       TextFormField(
                         controller: _passwordController,
                         obscureText: _obscurePassword,
@@ -348,17 +398,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           ),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
+                          if (value == null || value.isEmpty)
                             return 'Password is required.';
-                          }
-                          if (value.length < 6) {
+                          if (value.length < 6)
                             return 'Password must be at least 6 characters.';
-                          }
                           return null;
                         },
                       ),
                       const SizedBox(height: 16),
 
+                      // Confirm Password
                       TextFormField(
                         controller: _confirmPasswordController,
                         obscureText: _obscurePassword,
@@ -368,17 +417,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                           border: OutlineInputBorder(),
                         ),
                         validator: (value) {
-                          if (value == null || value.isEmpty) {
+                          if (value == null || value.isEmpty)
                             return 'Please confirm your password.';
-                          }
-                          if (value != _passwordController.text) {
+                          if (value != _passwordController.text)
                             return 'Passwords do not match.';
-                          }
                           return null;
                         },
                       ),
                       const SizedBox(height: 24),
 
+                      // Register button
                       SizedBox(
                         height: 50,
                         child: ElevatedButton(

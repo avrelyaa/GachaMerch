@@ -68,6 +68,24 @@ class ApiService {
     return {'status': response.statusCode, 'data': jsonDecode(response.body)};
   }
 
+  static Future<Map<String, dynamic>> googleLogin({
+    required String email,
+    required String username,
+    required String googleId,
+  }) async {
+    final response = await http.post(
+      Uri.parse('$baseUrl/auth/google'),
+      headers: {'Content-Type': 'application/json'},
+      body: jsonEncode({'email': email, 'username': username, 'googleId': googleId}),
+    );
+    final data = jsonDecode(response.body);
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      await saveToken(data['token']);
+      await saveUser(data['user']);
+    }
+    return {'status': response.statusCode, 'data': data};
+  }
+
   static Future<List<Product>> getResources() async {
     final response = await http.get(Uri.parse('$baseUrl/resources'));
     if (response.statusCode == 200) {
@@ -98,7 +116,7 @@ class ApiService {
     );
     return {'status': response.statusCode, 'data': jsonDecode(response.body)};
   }
-
+  
   static Future<Map<String, dynamic>> updateResource(
       String id, Map<String, dynamic> data) async {
     final headers = await _authHeaders();
