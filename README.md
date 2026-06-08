@@ -25,20 +25,21 @@ cd backend
 npm install
 
 # Configure environment variables
-# Edit .env file:
-# DB_HOST=localhost
-# DB_USER=root
-# DB_PASSWORD=
-# DB_NAME=gacha_merch
-# JWT_SECRET=gachamerch_secret_key_2026
-# PORT=3000
+Edit .env file:
+```bash
+DB_HOST=localhost
+DB_USER=root
+DB_PASSWORD=
+DB_NAME=gacha_merch
+JWT_SECRET=gachamerch_secret_key_2026
+PORT=3000
+```
 
 # Start the backend server
 node server.js
 ---------------------
 
 Backend will run on: http://localhost:3000
-
 
 3. Frontend Setup
 
